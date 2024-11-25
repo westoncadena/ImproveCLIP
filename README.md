@@ -10,7 +10,7 @@ Try in Colab: [https://colab.research.google.com/drive/1FTF-cTcW11Gyrwu8uhTZOXgL
 
 Setting up a new virtual environment with Conda:
 ````bash
-env_name='csce689_proj'
+env_name='ImproveCLIP'
 conda create -n "$env_name" python=3.10
 conda activate "$env_name"
 pip install -r requirements.txt
