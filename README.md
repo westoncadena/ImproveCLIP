@@ -16,22 +16,54 @@ conda activate "$env_name"
 pip install -r requirements.txt
 ````
 
+```
+mkdir Clip-Final-Project/
+cd ./Clip-Final-Project
+
+git clone -b project git@github.com:westoncadena/ImproveCLIP.git
+mkdir checkpoints
+export PYTHONPATH="$PYTHONPATH:./ImproveCLIP/bimodal_exps"
+export HUGGINGFACE_HUB_CACHE='./checkpoints/huggingface'
+
+mkdir ./datasets
+mkdir /tmp/datasets
+mkdir /tmp/datasets/imagenet
+
+tar xf ./datasets/clip_train.tar.gz -C /tmp/datasets
+tar xf ./datasets/cc3m_subset_100k.tar.gz -C /tmp/datasets
+tar xf ./datasets/mscoco_val.tar.gz -C /tmp/datasets
+tar xf ./datasets/val.tar -C /tmp/datasets/imagenet
+
+```
+
 ### Training and Evaluation
 
 1. Download the data: [cc3m_subset_100k.tar.gz](https://drive.google.com/file/d/142zQjlOw0Xw4tKzXMrQjYE6NtGRTeasT/view?usp=drive_link), a 100k subset of the [Conceptual Captions](https://ai.google.com/research/ConceptualCaptions/) dataset; [mscoco_val.tar.gz](https://drive.google.com/file/d/142tMsnclHTTPpnTXHSeNgTUlBk4She6o/view?usp=drive_link), a 5k subset of the [COCO](https://cocodataset.org/#home) val2014 dataset; [clip_train.tar.gz](https://drive.google.com/file/d/142xxRoMaHxX3BIfCw_1b_G_dgu-02Yq3/view?usp=drive_link), captions of the previous datasets; [imagenet/val.tar](https://drive.google.com/file/d/1NXhfhwFy-nhdABACkodgYqm9pomDKE39/view?usp=sharing), [ImageNet](https://www.image-net.org/challenges/LSVRC/index.php) validation set. The code and data should be structured as follows:
     ```
     .
-    +--bimodal_exps (code)
+    +--ImproveCLIP (git repo)
+    |  +--bimodual-exps (code)
+    |  
+    +--checkpoints
     |
-    +--clip_train (captions)
-    |  +--cc3m_train_subset.json
-    |  +--coco_val.json
-    |
+    +--datasets (tar files)
+    |  +--cc3m_subset_100k.tar.gz
+    |  +--mscoco_val.tar.gz
+    |  +--clip_train.tar.gz
+    |  +--val.tar
+
+    \tmp
     +--datasets (images)
     |  +--cc3m_subset_100k
     |  +--mscoco_val
     |  +--imagnet
     |  |  +-- val
+    |  |
+    |  +--clip_train (captions)
+    |  |  +--cc3m_train_subset.json
+    |  |  +--coco_val.json
+    |  |
+    
     ```
 2. To train a model on cc3m, use `run.slurm` if slurm is supported or run
     ```bash
