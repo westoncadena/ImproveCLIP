@@ -6,16 +6,6 @@ In this repo, we show how to train a self-supervised model by using Global Contr
 
 Try in Colab: [https://colab.research.google.com/drive/1FTF-cTcW11Gyrwu8uhTZOXgLsjp49Z9W?usp=sharing](https://colab.research.google.com/drive/1FTF-cTcW11Gyrwu8uhTZOXgLsjp49Z9W?usp=sharing)
 
-### Environment
-
-Setting up a new virtual environment with Conda:
-````bash
-env_name='ImproveCLIP'
-conda create -n "$env_name" python=3.10
-conda activate "$env_name"
-pip install -r requirements.txt
-````
-
 ```
 mkdir Clip-Final-Project/
 cd ./Clip-Final-Project
@@ -35,6 +25,16 @@ tar xf ./datasets/mscoco_val.tar.gz -C /tmp/datasets
 tar xf ./datasets/val.tar -C /tmp/datasets/imagenet
 
 ```
+
+### Environment
+
+Setting up a new virtual environment with Conda:
+````bash
+env_name='ImproveCLIP'
+conda create -n "$env_name" python=3.10
+conda activate "$env_name"
+pip install -r requirements.txt
+````
 
 ### Training and Evaluation
 
