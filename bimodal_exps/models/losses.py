@@ -728,7 +728,7 @@ class NTXent_Loss(nn.Module):
             temperature: Temperature scaling factor.
             large_num: A large constant used for masking logits.
         """
-        super(NTXentLoss, self).__init__()
+        super(NTXent_Loss, self).__init__()
         self.world_size = world_size
         self.temperature = temperature
         self.large_num = large_num
