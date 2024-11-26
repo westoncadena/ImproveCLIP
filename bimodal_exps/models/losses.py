@@ -715,4 +715,81 @@ class onlineCLR_Loss(nn.Module):
         return loss
 
 
+"""
+    adapted from https://paperswithcode.com/method/nt-xent
+"""
+class NTXentLoss(nn.Module):
+    def __init__(self, world_size=8, temperature=0.07, large_num=1e9):
+        """
+        NT-Xent loss for self-supervised learning with distributed training support.
+
+        Args:
+            world_size: The number of processes in distributed training.
+            temperature: Temperature scaling factor.
+            large_num: A large constant used for masking logits.
+        """
+        super(NTXentLoss, self).__init__()
+        self.world_size = world_size
+        self.temperature = temperature
+        self.large_num = large_num
+
+    def forward(self, image_features, text_features, image_idx=None, text_idx=None, hidden_norm=True, weights=1.0):
+        """
+        Compute NT-Xent loss for a batch of image-text pairs.
+
+        Args:
+            image_features: Tensor of shape (batch_size, embedding_dim) for image features.
+            text_features: Tensor of shape (batch_size, embedding_dim) for text features.
+            hidden_norm: Whether to normalize the embeddings.
+            weights: Weighting factor for the loss.
+
+        Returns:
+            loss: The NT-Xent loss value.
+            logits_ab: The logits for the NT-Xent prediction task.
+            labels: The labels for the NT-Xent prediction task.
+        """
+        # Automatically get device from image_features (it will be the same for text_features)
+        device = image_features.device
+
+        # If world_size > 1, gather the features across all processes
+        if self.world_size > 1:
+            image_features = torch.cat(GatherLayer.apply(image_features), dim=0)
+            text_features = torch.cat(GatherLayer.apply(text_features), dim=0)
+
+        # Normalize the features if required
+        if hidden_norm:
+            image_features = F.normalize(image_features, p=2, dim=-1)
+            text_features = F.normalize(text_features, p=2, dim=-1)
+
+        batch_size = image_features.size(0)
+
+        # Create one-hot labels
+        labels = torch.arange(batch_size, device=device)  # [B]
+        masks = torch.eye(batch_size, device=device)  # [B, B]
+
+        # Compute logits
+        logits_aa = torch.matmul(image_features, image_features.T) / self.temperature
+        logits_aa = logits_aa - masks * self.large_num
+        logits_bb = torch.matmul(text_features, text_features.T) / self.temperature
+        logits_bb = logits_bb - masks * self.large_num
+        logits_ab = torch.matmul(image_features, text_features.T) / self.temperature
+        logits_ba = torch.matmul(text_features, image_features.T) / self.temperature
+
+        # Compute the loss
+        loss_a = F.cross_entropy(
+            torch.cat([logits_ab, logits_aa], dim=1), 
+            labels, 
+            reduction='mean'
+        ) * weights
+
+        loss_b = F.cross_entropy(
+            torch.cat([logits_ba, logits_bb], dim=1), 
+            labels, 
+            reduction='mean'
+        ) * weights
+
+        loss = loss_a + loss_b
+        return loss, logits_ab, labels
+
+
 
