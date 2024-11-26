@@ -14,6 +14,7 @@ from .nvnovograd import NvNovoGrad
 from .radam import RAdam
 from .rmsprop_tf import RMSpropTF
 from .sgdp import SGDP
+from .ranger21 import Ranger21
 
 try:
     from apex.optimizers import FusedNovoGrad, FusedAdam, FusedLAMB, FusedSGD
@@ -69,7 +70,16 @@ def create_optimizer(args, model, filter_bias_and_bn=True):
 
     opt_split = opt_lower.split('_')
     opt_lower = opt_split[-1]
-    if opt_lower == 'sgd' or opt_lower == 'nesterov':
+    if opt_lower == 'ranger21':
+        optimizer = Ranger21(
+            parameters,
+            lr=args.lr,
+            weight_decay=weight_decay,
+            num_batches_per_epoch=args.batch_size_train,  # Using existing argument
+            num_epochs=args.epochs,
+            **opt_args  # Pass additional optimizer-specific args
+        ) 
+    elif opt_lower == 'sgd' or opt_lower == 'nesterov':
         opt_args.pop('eps', None)
         optimizer = optim.SGD(parameters, momentum=args.momentum, nesterov=True, **opt_args)
     elif opt_lower == 'momentum':
