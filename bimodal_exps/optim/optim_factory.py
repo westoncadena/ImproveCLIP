@@ -73,11 +73,9 @@ def create_optimizer(args, model, filter_bias_and_bn=True):
     if opt_lower == 'ranger21':
         optimizer = Ranger21(
             parameters,
-            lr=args.lr,
-            weight_decay=weight_decay,
             num_batches_per_epoch=args.batch_size_train,  # Using existing argument
             num_epochs=args.epochs,
-            **opt_args  # Pass additional optimizer-specific args
+            **opt_args
         ) 
     elif opt_lower == 'sgd' or opt_lower == 'nesterov':
         opt_args.pop('eps', None)
