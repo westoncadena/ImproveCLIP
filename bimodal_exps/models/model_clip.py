@@ -100,7 +100,7 @@ class CLIP(nn.Module):
         elif self.ita_type == 'isogclr_new':
             self.criterion = iSogCLR_New_Loss(world_size=world_size, gamma=sogclr_gamma, rho_I=rho_I, rho_T=rho_T, tau_init=tau_init, bsz=bsz,
                                               use_temp_net=use_temp_net, feature_dim=embed_dim)
-        elif self.ita_type == 'NTXent':
+        elif self.ita_type == 'ntxent':
             self.criterion = NTXent_Loss(world_size=world_size, temperature=self.temp)
         else:
             raise NotImplementedError
@@ -207,6 +207,14 @@ class CLIP(nn.Module):
             loss_ita = self.criterion(image_feat, text_feat)
             info_dict['avg_text_tau'] = 0.0
             info_dict['avg_image_tau'] = 0.0
+
+        elif self.ita_type == 'ntxent':
+            # Here, call NTXent_Loss with the required inputs
+            loss_ita, logits_ab, labels = self.criterion(image_feat, text_feat, idx, text_idx)
+
+            # Optionally collect some info
+            info_dict['avg_image_tau'] = 0.0  # Set as needed
+            info_dict['avg_text_tau'] = 0.0  # Set as needed
 
         else:
             raise NotImplementedError
