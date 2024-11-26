@@ -718,7 +718,7 @@ class onlineCLR_Loss(nn.Module):
 """
     adapted from https://paperswithcode.com/method/nt-xent
 """
-class NTXentLoss(nn.Module):
+class NTXent_Loss(nn.Module):
     def __init__(self, world_size=8, temperature=0.07, large_num=1e9):
         """
         NT-Xent loss for self-supervised learning with distributed training support.
