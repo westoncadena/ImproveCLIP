@@ -465,51 +465,28 @@ class Ranger21(TO.Optimizer):
             raise ValueError(f"warmup type {style} not implemented.")
 
     def get_warm_down(self, lr, iteration):
-        """ linear style warmdown """
+        """Linear style warmdown."""
         if iteration < self.start_warm_down:
             return lr
-
-        if iteration > self.start_warm_down - 1:
-            # print when starting
+    
+        if iteration >= self.start_warm_down:
             if not self.warmdown_displayed:
                 print(
                     f"\n** Ranger21 update: Warmdown starting now.  Current iteration = {iteration}....\n"
                 )
                 self.warmdown_displayed = True
-
-            warmdown_iteration = (
-                iteration + 1
-            ) - self.start_warm_down  # to force the first iteration to be 1 instead of 0
-
-            if warmdown_iteration < 1:
-                print(
-                    f" warning - iteration started at {iteration} and {self.start_warm_down} with value {warmdown_iteration}"
-                )
-                warmdown_iteration = 1
-            # print(f"warmdown iteration = {warmdown_iteration}")
-            # linear start 3672  5650 total iterations 1972 iterations
-
-            warmdown_pct = warmdown_iteration / (
-                self.warmdown_total_iterations + 1
-            )  # +1 to offset that we have to include first as an iteration to support 1 index instead of 0 based.
-            if warmdown_pct > 1.00:
-                print(f"error in warmdown pct calc.  new pct = {warmdown_pct}")
-                print(f"auto handled but please report issue")
-                warmdown_pct = 1.00
-
-            # .5
+    
+            warmdown_iteration = iteration - self.start_warm_down + 1
+            warmdown_iteration = max(1, warmdown_iteration)  # Ensure non-zero value
+    
+            warmdown_pct = min(1.0, warmdown_iteration / (self.warmdown_total_iterations + 1))
             lr_range = self.warmdown_lr_delta
-
             reduction = lr_range * warmdown_pct
-            # print(f"lr reduction = {reduction} for {warmdown_pct} with iter {warmdown_iteration} and total iter {iteration}")
-            new_lr = self.starting_lr - reduction
-            if new_lr < self.min_lr:
-                print(f"error in warmdown - lr below min lr. current lr = {new_lr}")
-                print(f"auto handling but please report issue!")
-                new_lr = self.min_lr
-
+    
+            new_lr = max(self.min_lr, self.starting_lr - reduction)  # Clamp to min_lr
             self.current_lr = new_lr
             return new_lr
+
 
             # new_lr = (
             #    self.min_lr
