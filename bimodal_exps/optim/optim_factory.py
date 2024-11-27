@@ -73,7 +73,7 @@ def create_optimizer(args, model, filter_bias_and_bn=True):
     if opt_lower == 'ranger21':
         optimizer = Ranger21(
             parameters,
-            num_batches_per_epoch=args.batch_size_train,  # Using existing argument
+            num_batches_per_epoch=781,  # Using existing argument
             num_epochs=args.epochs,
             **opt_args
         ) 
