@@ -68,6 +68,7 @@ class CLIP(nn.Module):
         self.vision_proj = nn.Linear(self.visual_encoder.num_features, embed_dim)   
 
         self.ita_type = ita_type
+        rho_init = 0.2
 
         if self.ita_type == 'clip':
             if not personalized_tau:
