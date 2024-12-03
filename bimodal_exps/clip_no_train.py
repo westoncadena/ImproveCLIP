@@ -494,6 +494,14 @@ def main(args):
     best_epoch = 0
 
     print("Start training")
+
+    save_obj = {
+        'model': model_without_ddp.state_dict()
+    }
+    torch.save(save_obj, os.path.join(args.output_dir, 'no_train.pth'))
+    
+    print("Saved model with no training")
+    
     start_time = time.time()    
     for epoch in range(0, max_epoch):
         if not args.evaluate:
