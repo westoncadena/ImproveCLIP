@@ -435,7 +435,7 @@ def main(args):
                   world_size=args.world_size, ita_type=args.ita_type, sogclr_gamma=args.sogclr_gamma, rho_I=args.rho_I, rho_T=args.rho_T, tau_init=args.tau_init,
                   eta_init=args.eta_init, beta_u=args.beta_u, temp=args.temp, learnable_temp=args.learnable_temp,
                   vicreg_sim_coeff=args.vicreg_sim_coeff, vicreg_std_coeff=args.vicreg_std_coeff, personalized_tau=args.personalized_tau, 
-                  use_temp_net=args.isogclr_temp_net, alpha=args.alpha, distributed=args.distributed)
+                  use_temp_net=args.isogclr_temp_net, alpha=args.alpha, distributed=args.distributed, freeze=args.freeze)
     model = model.to(device)
 
     if args.evaluate or args.ita_type == 'isogclr_denoise':
@@ -657,6 +657,9 @@ if __name__ == '__main__':
     parser.add_argument('--dist_url', default='env://', help='url used to set up distributed training')
     parser.add_argument('--distributed', action='store_true')
     parser.add_argument('--no-distributed', dest='distributed', action='store_false')
+
+    # freeze argument
+    parser.add_argument('--freeze', action='store_true', help="Whether to freeze the backbones during training")
 
     # output path
     parser.add_argument('--output_dir', default='./output/clip_test')  
