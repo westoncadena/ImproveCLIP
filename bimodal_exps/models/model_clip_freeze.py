@@ -229,11 +229,11 @@ class CLIP(nn.Module):
 
         return loss_ita, info_dict
 
-def freeze_backbones(self):
-    self.freeze = True
-
-def unfreeze_backbones(self):
-    self.freeze = False
+    def freeze_backbones(self):
+        self.freeze = True
+    
+    def unfreeze_backbones(self):
+        self.freeze = False
 
 @torch.no_grad()
 def concat_all_gather(tensor):
