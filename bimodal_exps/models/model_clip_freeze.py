@@ -36,8 +36,11 @@ class CLIP(nn.Module):
                  use_temp_net = True,
                  alpha = 1.0,
                  distributed=True,
+                 freeze_backbones=False,
                  ):
         super().__init__()
+
+        self.freeze_backbones = freeze_backbones
 
         self.temp = temp
         self.learnable_temp = learnable_temp
@@ -116,13 +119,17 @@ class CLIP(nn.Module):
                     self.image_temp.clamp_(0.001, 0.5)
                     self.text_temp.clamp_(0.001, 0.5)
         
-        image_embeds = self.visual_encoder(image)
-        image_embeds = self.vision_proj(image_embeds)
-        image_feat = F.normalize(image_embeds, dim=-1) 
+        # Forward through visual backbone
+        with torch.no_grad() if self.freeze_backbones else torch.enable_grad():
+            image_embeds = self.visual_encoder(image)
+        image_embeds = self.vision_proj(image_embeds)  # Gradients allowed here
+        image_feat = F.normalize(image_embeds, dim=-1)
 
-        text_output = self.text_encoder(text.input_ids, attention_mask=text.attention_mask, output_hidden_states=False)
-        text_embeds = self.text_proj(text_output.last_hidden_state[:,0,:])
-        text_feat = F.normalize(text_embeds, dim=-1)                 
+        # Forward through text backbone
+        with torch.no_grad() if self.freeze_backbones else torch.enable_grad():
+            text_output = self.text_encoder(text.input_ids, attention_mask=text.attention_mask)
+        text_embeds = self.text_proj(text_output.last_hidden_state[:, 0, :])  # Gradients allowed here
+        text_feat = F.normalize(text_embeds, dim=-1)          
 
         avg_image_tau = None
         avg_text_tau = None
@@ -222,7 +229,11 @@ class CLIP(nn.Module):
 
         return loss_ita, info_dict
 
+def freeze_backbones(self):
+    self.freeze_backbones = True
 
+def unfreeze_backbones(self):
+    self.freeze_backbones = False
 
 @torch.no_grad()
 def concat_all_gather(tensor):
