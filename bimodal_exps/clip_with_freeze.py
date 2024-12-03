@@ -25,7 +25,7 @@ import torch.distributed as dist
 from torch.utils.data import DataLoader, Subset
 from torchvision import transforms, datasets
 
-from models.model_clip import CLIP
+from models.model_clip_freeze import CLIP
 from transformers import AutoTokenizer, RobertaTokenizer
 
 import utils
@@ -37,11 +37,6 @@ from zeroshot_transfer.classes import CIFAR10_CLASSES, CIFAR100_CLASSES, IMAGENE
 
 
 from tqdm import tqdm
-
-def freeze_layers(model, freeze=True):
-    for param in model.parameters():
-        param.requires_grad = not freeze
-
 
 def train(model, data_loader, optimizer, tokenizer, epoch, max_epoch, warmup_steps, device, scheduler, grad_scaler, args):
     # train
@@ -500,7 +495,9 @@ def main(args):
     print("Start training")
     start_time = time.time()    
 
-    freeze_layers(model.image_encoder[:len(model.image_encoder) // 2], freeze=True)
+    # Freeze Layers
+    print("Freezing backbones for warm-up phase")
+    model.freeze_backbones()
 
     for epoch in range(0, max_epoch):
         if not args.evaluate:
@@ -509,8 +506,9 @@ def main(args):
             train_stats = train(model, train_loader, optimizer, tokenizer, epoch, max_epoch, warmup_steps, device, lr_scheduler, 
                                 grad_scaler, args)
             
-            if epoch == int(0.4 * max_epoch):
-                freeze_layers(model, freeze=False)
+            if epoch == 5:
+                print("Unfreezing backbones for fine-tuning phase")
+                model.unfreeze_backbones()
             
         if args.evaluate:
             score_val_i2t_coco, score_val_t2i_coco = evaluation(model_without_ddp, val_coco_loader, tokenizer, device, args)
