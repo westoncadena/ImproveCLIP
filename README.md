@@ -2,6 +2,7 @@
 * Added NT-Xent Loss Function
 * Added Ranger21 Optimizer
 * Added Freezing when training
+
 To take advantage of freezing in trianing replace ```clip.py``` with ```clip_with_freeze.py```
 
 # iSogCLR PyTorch Implementation
