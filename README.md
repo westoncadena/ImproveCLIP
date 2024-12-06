@@ -1,3 +1,9 @@
+# Improvements from original csce689_iSogCLR repository
+* Added NT-Xent Loss Function
+* Added Ranger21 Optimizer
+* Added Freezing when training
+To take advantage of freezing in trianing replace ```clip.py``` with ```clip_with_freeze.py```
+
 # iSogCLR PyTorch Implementation
 
 In this repo, we show how to train a self-supervised model by using Global Contrastive Loss (GCL) on a widely used bimodal image-text dataset [CC3M](https://ai.google.com/research/ConceptualCaptions/download).
